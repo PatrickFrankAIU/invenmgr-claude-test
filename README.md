@@ -4,9 +4,6 @@
 
 This project is used by students in the Full-Stack Web Development program at Digital Crafts. Questions may be addressed to Patrick Frank at pfrank@aiuniv.edu. 
 
-This page is hosted on GitHub Pages. To view the page, please click here:
-https://patrickfrankaiu.github.io/Inventory-Manager/
-
 ## Overview
 This project is a simple **Inventory Manager** web app.  
 It allows you to **add and remove items** in an inventory table.  
