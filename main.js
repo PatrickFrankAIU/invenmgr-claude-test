@@ -54,6 +54,18 @@ function saveData() {
     }));
 }
 
+// Claude: In-page message banner replacing alert() calls
+let messageBanner = document.getElementById('messageBanner');
+let messageTimeout = null;
+function showMessage(text, type) {
+    clearTimeout(messageTimeout);
+    messageBanner.textContent = text;
+    messageBanner.className = 'message-banner ' + type;
+    messageTimeout = setTimeout(function() {
+        messageBanner.className = 'message-banner hidden';
+    }, 4000);
+}
+
 // Claude: Highlight an inventory item after a shipment or order
 function highlightProduct(categoryName, productName, type) {
     let selector = '[data-category="' + categoryName + '"][data-product="' + productName + '"]';
@@ -123,11 +135,11 @@ function addNewCategory() {
     let newCategoryInput = document.getElementById('newCategoryInput').value.trim();
     // Claude: Added input validation - check for empty and duplicate category names
     if (!newCategoryInput) {
-        alert('Please enter a category name.');
+        showMessage('Please enter a category name.', 'error');
         return;
     }
     if (inventory.find(cat => cat.category === newCategoryInput)) {
-        alert('Category "' + newCategoryInput + '" already exists.');
+        showMessage('Category "' + newCategoryInput + '" already exists.', 'error');
         return;
     }
     inventory.push({
@@ -142,6 +154,7 @@ function addNewCategory() {
     document.getElementById('newCategoryInput').value = '';
     saveData();
     displayInventory();
+    showMessage('Category "' + newCategoryInput + '" added.', 'success');
 }
 document.getElementById('addCategoryButton').addEventListener('click', addNewCategory);
 
@@ -151,21 +164,21 @@ function addNewProduct() {
     let newProductInput = document.getElementById('newProductInput').value.trim();
 
     if (!categoryInput) {
-        alert('Please select a category first.');
+        showMessage('Please select a category first.', 'error');
         return;
     }
     if (!newProductInput) {
-        alert('Please enter a product name.');
+        showMessage('Please enter a product name.', 'error');
         return;
     }
 
     let category = inventory.find(cat => cat.category === categoryInput);
     if (!category) {
-        alert('Category not found.');
+        showMessage('Category not found.', 'error');
         return;
     }
     if (category.products.find(prod => prod.product === newProductInput)) {
-        alert('Product "' + newProductInput + '" already exists in ' + categoryInput + '.');
+        showMessage('Product "' + newProductInput + '" already exists in ' + categoryInput + '.', 'error');
         return;
     }
 
@@ -174,6 +187,7 @@ function addNewProduct() {
     saveData();
     displayInventory();
     createProducts();
+    showMessage('Product "' + newProductInput + '" added to ' + categoryInput + '.', 'success');
 }
 document.getElementById('addProductButton').addEventListener('click', addNewProduct);
 
@@ -186,15 +200,15 @@ function addShipment() {
 
     // Claude: Added input validation for shipments
     if (!categoryInput) {
-        alert('Please select a category.');
+        showMessage('Please select a category.', 'error');
         return;
     }
     if (!productInput) {
-        alert('Please select a product.');
+        showMessage('Please select a product.', 'error');
         return;
     }
     if (isNaN(quantityInput) || quantityInput <= 0) {
-        alert('Please enter a valid quantity greater than zero.');
+        showMessage('Please enter a valid quantity greater than zero.', 'error');
         return;
     }
 
@@ -219,10 +233,12 @@ function addShipment() {
         date: new Date().toLocaleString()
     });
 
+    document.getElementById('quantityInput').value = '';
     saveData();
     displayInventory();
     highlightProduct(categoryInput, productInput, 'shipment');
     displayShipment();
+    showMessage('Shipment recorded: ' + productInput + ' x' + quantityInput + '.', 'success');
 }
 
 // Claude: Rewritten to display timestamped shipment log (newest first)
@@ -248,28 +264,28 @@ function addOrder() {
 
     // Claude: Added input validation for orders (including stock check)
     if (!categoryInput) {
-        alert('Please select a category.');
+        showMessage('Please select a category.', 'error');
         return;
     }
     if (!productInput) {
-        alert('Please select a product.');
+        showMessage('Please select a product.', 'error');
         return;
     }
     if (isNaN(quantityInput) || quantityInput <= 0) {
-        alert('Please enter a valid quantity greater than zero.');
+        showMessage('Please enter a valid quantity greater than zero.', 'error');
         return;
     }
 
     let category = inventory.find(cat => cat.category === categoryInput);
     if (!category) {
-        alert('Category not found in inventory.');
+        showMessage('Category not found in inventory.', 'error');
         return;
     }
 
     let product = category.products.find(prod => prod.product === productInput);
     if (!product || product.quantity < quantityInput) {
         let available = product ? product.quantity : 0;
-        alert('Insufficient stock. Available: ' + available + ', requested: ' + quantityInput + '.');
+        showMessage('Insufficient stock. Available: ' + available + ', requested: ' + quantityInput + '.', 'error');
         return;
     }
     product.quantity -= quantityInput;
@@ -282,10 +298,12 @@ function addOrder() {
         date: new Date().toLocaleString()
     });
 
+    document.getElementById('quantityInput').value = '';
     saveData();
     displayInventory();
     highlightProduct(categoryInput, productInput, 'order');
     displayOrder();
+    showMessage('Order recorded: ' + productInput + ' x' + quantityInput + '.', 'success');
 }
 
 // Claude: Rewritten to display timestamped order log (newest first)
