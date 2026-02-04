@@ -12,7 +12,8 @@
     <h1>Inventory Management</h1>
 
     <h2>Update Inventory</h2>
-    Category: <select id="categoryInput"><option id='removeMe' value="Fruits">Please select a category</option></select>
+    Category: <!-- Claude: Fixed placeholder option to use empty value for validation -->
+    <select id="categoryInput"><option value="">Please select a category</option></select>
     Product: <select id="productInput"></select>
     Quantity: <input type="number" id="quantityInput" placeholder="Quantity">
     <button onclick="addShipment()">Add Shipment</button>

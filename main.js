@@ -74,12 +74,20 @@ categoryMenu.addEventListener('change', createProducts);
 
 function addNewCategory() {
     // this function adds a new category to the inventory (but not products)
-    let newCategoryInput = document.getElementById('newCategoryInput').value;
-    if (newCategoryInput) {
-        inventory.push({
-            category: newCategoryInput,
-            products: []
-        });
+    let newCategoryInput = document.getElementById('newCategoryInput').value.trim();
+    // Claude: Added input validation - check for empty and duplicate category names
+    if (!newCategoryInput) {
+        alert('Please enter a category name.');
+        return;
+    }
+    if (inventory.find(cat => cat.category === newCategoryInput)) {
+        alert('Category "' + newCategoryInput + '" already exists.');
+        return;
+    }
+    inventory.push({
+        category: newCategoryInput,
+        products: []
+    });
         // the code below adds the new category to the category dropdown list 
         let categoryOption = document.createElement('option');
         categoryOption.value = newCategoryInput;
@@ -94,10 +102,23 @@ document.getElementById('addCategoryButton').addEventListener('click', addNewCat
 function addShipment() {
     // this code adds a shipment (incoming new inventory)
 
-    // do we really need these first two variables? (same as the globals but with .value)
     let categoryInput = document.getElementById('categoryInput').value;
     let productInput = document.getElementById('productInput').value;
-    let quantityInput = parseInt(document.getElementById('quantityInput').value); // for qty
+    let quantityInput = parseInt(document.getElementById('quantityInput').value);
+
+    // Claude: Added input validation for shipments
+    if (!categoryInput) {
+        alert('Please select a category.');
+        return;
+    }
+    if (!productInput) {
+        alert('Please select a product.');
+        return;
+    }
+    if (isNaN(quantityInput) || quantityInput <= 0) {
+        alert('Please enter a valid quantity greater than zero.');
+        return;
+    }
 
     let category = inventory.find(cat => cat.category === categoryInput);
     if (!category) { // check: Why is this "not"? 
@@ -152,17 +173,33 @@ function addOrder() {
     let productInput = document.getElementById('productInput').value;
     let quantityInput = parseInt(document.getElementById('quantityInput').value);
 
+    // Claude: Added input validation for orders (including stock check)
+    if (!categoryInput) {
+        alert('Please select a category.');
+        return;
+    }
+    if (!productInput) {
+        alert('Please select a product.');
+        return;
+    }
+    if (isNaN(quantityInput) || quantityInput <= 0) {
+        alert('Please enter a valid quantity greater than zero.');
+        return;
+    }
+
     let category = inventory.find(cat => cat.category === categoryInput);
     if (!category) {
-        category = {category: categoryInput, products: []};
+        alert('Category not found in inventory.');
+        return;
     }
 
     let product = category.products.find(prod => prod.product === productInput);
-    if (product) {
-        product.quantity -= quantityInput;
-    } else {
-        category.products.push({product: productInput, quantity: -quantityInput});
+    if (!product || product.quantity < quantityInput) {
+        let available = product ? product.quantity : 0;
+        alert('Insufficient stock. Available: ' + available + ', requested: ' + quantityInput + '.');
+        return;
     }
+    product.quantity -= quantityInput;
 
     let orderCategory = order.find(cat => cat.category === categoryInput);
     if (!orderCategory) {
