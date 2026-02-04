@@ -1,0 +1,54 @@
+/* styles.css */
+/* This is just some basic formatting to get us started. */
+
+/* Body styles */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+}
+
+/* Heading styles */
+h1, h2 {
+    color: #333;
+}
+
+/* Form and input styles */
+input[type="number"], input[type="text"], select {
+    margin-bottom: 10px;
+    padding: 8px;
+    width: 200px;
+}
+
+input[type="number"], input[type="text"] {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Button styles */
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Inventory display styles */
+#inventoryDisplay {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Total quantity display */
+#totalQuantity {
+    margin-top: 10px;
+    font-weight: bold;
+}

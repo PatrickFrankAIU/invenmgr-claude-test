@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js' defer></script>
+</head>
+<body>
+    <h1>Inventory Management</h1>
+
+    <h2>Update Inventory</h2>
+    Category: <select id="categoryInput"><option id='removeMe' value="Fruits">Please select a category</option></select>
+    Product: <select id="productInput"></select>
+    Quantity: <input type="number" id="quantityInput" placeholder="Quantity">
+    <button onclick="addShipment()">Add Shipment</button>
+    <button onclick="addOrder()">Add Order</button>
+
+    <div id="totalQuantity"></div>
+
+    <input id="newCategoryInput" type="text" placeholder="New Category">
+    <button id="addCategoryButton">Add Category</button>
+
+    <h2>Inventory</h2>
+    <div id="inventoryDisplay"></div>
+
+    <h2>Shipments</h2>
+    <div id="shipmentDisplay"></div>
+
+    <h2>Orders</h2>
+    <div id="orderDisplay"></div>
+</body>
+</html>
