@@ -88,14 +88,13 @@ function addNewCategory() {
         category: newCategoryInput,
         products: []
     });
-        // the code below adds the new category to the category dropdown list 
-        let categoryOption = document.createElement('option');
-        categoryOption.value = newCategoryInput;
-        categoryOption.textContent = newCategoryInput;
-        categoryMenu.appendChild(categoryOption);
-        document.getElementById('newCategoryInput').value = '';
-        displayInventory();
-    }
+    // the code below adds the new category to the category dropdown list
+    let categoryOption = document.createElement('option');
+    categoryOption.value = newCategoryInput;
+    categoryOption.textContent = newCategoryInput;
+    categoryMenu.appendChild(categoryOption);
+    document.getElementById('newCategoryInput').value = '';
+    displayInventory();
 }
 document.getElementById('addCategoryButton').addEventListener('click', addNewCategory);
 
