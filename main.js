@@ -32,11 +32,15 @@ function displayInventory() {
     // iterate through inventory and create HTML to display
     inventory.forEach(category => {
         // itemGroup contains ONE category and its item list
-        let itemGroup = document.createElement('div'); 
-        itemGroup.innerHTML = "<strong>" + category.category + ":" + "</strong>";
+        // Claude: Fixed XSS - replaced innerHTML with createElement/textContent
+        let itemGroup = document.createElement('div');
+        let heading = document.createElement('strong');
+        heading.textContent = category.category + ":";
+        itemGroup.appendChild(heading);
         category.products.forEach(product => {
-            //itemGroup.innerHTML += "<div>" + product.product + "</div>";
-            itemGroup.innerHTML += "<div>" + product.product + ": " + product.quantity + "</div>";
+            let productDiv = document.createElement('div');
+            productDiv.textContent = product.product + ": " + product.quantity;
+            itemGroup.appendChild(productDiv);
         });
         inventoryDisplay.appendChild(itemGroup);
     });
@@ -128,12 +132,16 @@ function addShipment() {
 function displayShipment() {
     let shipmentDisplay = document.getElementById('shipmentDisplay');
     shipmentDisplay.innerHTML = '';
+    // Claude: Fixed XSS - replaced innerHTML with createElement/textContent
     shipment.forEach(category => {
         let categoryEl = document.createElement('div');
-        categoryEl.innerHTML = "<strong>" + category.category + ": " + "</strong>";
+        let heading = document.createElement('strong');
+        heading.textContent = category.category + ":";
+        categoryEl.appendChild(heading);
         category.products.forEach(product => {
-            categoryEl.innerHTML += "<div>" + product.product + ": " +
-                product.quantity + "</div>";
+            let productDiv = document.createElement('div');
+            productDiv.textContent = product.product + ": " + product.quantity;
+            categoryEl.appendChild(productDiv);
         });
         shipmentDisplay.appendChild(categoryEl);
     });
@@ -176,11 +184,16 @@ function addOrder() {
 function displayOrder() {
     let orderDisplay = document.getElementById('orderDisplay');
     orderDisplay.innerHTML = '';
+    // Claude: Fixed XSS - replaced innerHTML with createElement/textContent
     order.forEach(category => {
         let categoryEl = document.createElement('div');
-        categoryEl.innerHTML = "<strong>" + category.category + "</strong>";
+        let heading = document.createElement('strong');
+        heading.textContent = category.category + ":";
+        categoryEl.appendChild(heading);
         category.products.forEach(product => {
-            categoryEl.innerHTML += "<div>" + product.product + ": " + product.quantity + "</div>";
+            let productDiv = document.createElement('div');
+            productDiv.textContent = product.product + ": " + product.quantity;
+            categoryEl.appendChild(productDiv);
         });
         orderDisplay.appendChild(categoryEl);
     });
