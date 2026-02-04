@@ -52,3 +52,22 @@ button:hover {
     margin-top: 10px;
     font-weight: bold;
 }
+
+/* Claude: Added highlight animations for shipment/order feedback */
+@keyframes highlight-shipment {
+    0%   { background-color: #a8e6a3; }
+    100% { background-color: transparent; }
+}
+
+@keyframes highlight-order {
+    0%   { background-color: #f5a623; }
+    100% { background-color: transparent; }
+}
+
+.highlight-shipment {
+    animation: highlight-shipment 1.5s ease-out;
+}
+
+.highlight-order {
+    animation: highlight-order 1.5s ease-out;
+}

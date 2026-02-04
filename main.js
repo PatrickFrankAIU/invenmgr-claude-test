@@ -47,7 +47,19 @@ function saveData() {
     }));
 }
 
-// display the inventory 
+// Claude: Highlight an inventory item after a shipment or order
+function highlightProduct(categoryName, productName, type) {
+    let selector = '[data-category="' + categoryName + '"][data-product="' + productName + '"]';
+    let el = document.querySelector(selector);
+    if (el) {
+        el.classList.add('highlight-' + type);
+        el.addEventListener('animationend', function() {
+            el.classList.remove('highlight-' + type);
+        }, { once: true });
+    }
+}
+
+// display the inventory
 function displayInventory() {
     // get inventory display HTML element and store it in a variable
     let inventoryDisplay = document.getElementById('inventoryDisplay');
@@ -63,6 +75,9 @@ function displayInventory() {
         itemGroup.appendChild(heading);
         category.products.forEach(product => {
             let productDiv = document.createElement('div');
+            // Claude: Added data attributes for highlight targeting
+            productDiv.dataset.category = category.category;
+            productDiv.dataset.product = product.product;
             productDiv.textContent = product.product + ": " + product.quantity;
             itemGroup.appendChild(productDiv);
         });
@@ -172,6 +187,7 @@ function addShipment() {
 
     saveData();
     displayInventory();
+    highlightProduct(categoryInput, productInput, 'shipment');
     displayShipment();
 }
 
@@ -241,6 +257,7 @@ function addOrder() {
 
     saveData();
     displayInventory();
+    highlightProduct(categoryInput, productInput, 'order');
     displayOrder();
 }
 
