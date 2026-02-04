@@ -145,6 +145,38 @@ function addNewCategory() {
 }
 document.getElementById('addCategoryButton').addEventListener('click', addNewCategory);
 
+// Claude: Added ability to add a new product to an existing category
+function addNewProduct() {
+    let categoryInput = document.getElementById('categoryInput').value;
+    let newProductInput = document.getElementById('newProductInput').value.trim();
+
+    if (!categoryInput) {
+        alert('Please select a category first.');
+        return;
+    }
+    if (!newProductInput) {
+        alert('Please enter a product name.');
+        return;
+    }
+
+    let category = inventory.find(cat => cat.category === categoryInput);
+    if (!category) {
+        alert('Category not found.');
+        return;
+    }
+    if (category.products.find(prod => prod.product === newProductInput)) {
+        alert('Product "' + newProductInput + '" already exists in ' + categoryInput + '.');
+        return;
+    }
+
+    category.products.push({ product: newProductInput, quantity: 0 });
+    document.getElementById('newProductInput').value = '';
+    saveData();
+    displayInventory();
+    createProducts();
+}
+document.getElementById('addProductButton').addEventListener('click', addNewProduct);
+
 function addShipment() {
     // this code adds a shipment (incoming new inventory)
 
