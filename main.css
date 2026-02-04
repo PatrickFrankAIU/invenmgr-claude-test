@@ -78,11 +78,6 @@ button:hover {
     border-radius: 4px;
 }
 
-/* Total quantity display */
-#totalQuantity {
-    margin-top: 10px;
-    font-weight: bold;
-}
 
 /* Claude: Added highlight animations for shipment/order feedback */
 @keyframes highlight-shipment {

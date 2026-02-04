@@ -26,13 +26,20 @@ let shipment = [];
 let order = [];
 
 // Claude: Load data from localStorage, or use defaults if nothing is saved
+// Claude: Shipment/order data changed from aggregated totals to timestamped log entries
 function loadData() {
     let saved = localStorage.getItem('inventoryAppData');
     if (saved) {
         let data = JSON.parse(saved);
         inventory = data.inventory;
-        shipment = data.shipment;
-        order = data.order;
+        // If old aggregated format is detected, reset to empty logs
+        if (data.shipment && data.shipment.length > 0 && data.shipment[0].category && !data.shipment[0].date) {
+            shipment = [];
+            order = [];
+        } else {
+            shipment = data.shipment || [];
+            order = data.order || [];
+        }
     } else {
         inventory = JSON.parse(JSON.stringify(defaultInventory));
     }
@@ -172,18 +179,13 @@ function addShipment() {
         category.products.push({ product: productInput, quantity: quantityInput });
     }
 
-    let shipCategory = shipment.find(cat => cat.category === categoryInput);
-    if (!shipCategory) {
-        shipCategory = { category: categoryInput, products: [] };
-        shipment.push(shipCategory);
-    }
-
-    let shipProduct = shipCategory.products.find(prod => prod.product === productInput);
-    if (shipProduct) {
-        shipProduct.quantity += quantityInput;
-    } else {
-        shipCategory.products.push({ product: productInput, quantity: quantityInput });
-    }
+    // Claude: Changed to timestamped log entry instead of aggregated totals
+    shipment.push({
+        category: categoryInput,
+        product: productInput,
+        quantity: quantityInput,
+        date: new Date().toLocaleString()
+    });
 
     saveData();
     displayInventory();
@@ -191,21 +193,19 @@ function addShipment() {
     displayShipment();
 }
 
+// Claude: Rewritten to display timestamped shipment log (newest first)
 function displayShipment() {
     let shipmentDisplay = document.getElementById('shipmentDisplay');
     shipmentDisplay.innerHTML = '';
-    // Claude: Fixed XSS - replaced innerHTML with createElement/textContent
-    shipment.forEach(category => {
-        let categoryEl = document.createElement('div');
-        let heading = document.createElement('strong');
-        heading.textContent = category.category + ":";
-        categoryEl.appendChild(heading);
-        category.products.forEach(product => {
-            let productDiv = document.createElement('div');
-            productDiv.textContent = product.product + ": " + product.quantity;
-            categoryEl.appendChild(productDiv);
-        });
-        shipmentDisplay.appendChild(categoryEl);
+    if (shipment.length === 0) {
+        shipmentDisplay.textContent = 'No shipments recorded.';
+        return;
+    }
+    let sorted = shipment.slice().reverse();
+    sorted.forEach(entry => {
+        let entryDiv = document.createElement('div');
+        entryDiv.textContent = entry.date + ": " + entry.product + " x" + entry.quantity + " (" + entry.category + ")";
+        shipmentDisplay.appendChild(entryDiv);
     });
 }
 
@@ -242,18 +242,13 @@ function addOrder() {
     }
     product.quantity -= quantityInput;
 
-    let orderCategory = order.find(cat => cat.category === categoryInput);
-    if (!orderCategory) {
-        orderCategory = {category: categoryInput, products: []};
-        order.push(orderCategory);
-    }
-
-    let orderProduct = orderCategory.products.find(prod => prod.product === productInput);
-    if (orderProduct) {
-        orderProduct.quantity += quantityInput;
-    } else {
-        orderCategory.products.push({product: productInput, quantity: quantityInput});
-    }
+    // Claude: Changed to timestamped log entry instead of aggregated totals
+    order.push({
+        category: categoryInput,
+        product: productInput,
+        quantity: quantityInput,
+        date: new Date().toLocaleString()
+    });
 
     saveData();
     displayInventory();
@@ -261,21 +256,19 @@ function addOrder() {
     displayOrder();
 }
 
+// Claude: Rewritten to display timestamped order log (newest first)
 function displayOrder() {
     let orderDisplay = document.getElementById('orderDisplay');
     orderDisplay.innerHTML = '';
-    // Claude: Fixed XSS - replaced innerHTML with createElement/textContent
-    order.forEach(category => {
-        let categoryEl = document.createElement('div');
-        let heading = document.createElement('strong');
-        heading.textContent = category.category + ":";
-        categoryEl.appendChild(heading);
-        category.products.forEach(product => {
-            let productDiv = document.createElement('div');
-            productDiv.textContent = product.product + ": " + product.quantity;
-            categoryEl.appendChild(productDiv);
-        });
-        orderDisplay.appendChild(categoryEl);
+    if (order.length === 0) {
+        orderDisplay.textContent = 'No orders recorded.';
+        return;
+    }
+    let sorted = order.slice().reverse();
+    sorted.forEach(entry => {
+        let entryDiv = document.createElement('div');
+        entryDiv.textContent = entry.date + ": " + entry.product + " x" + entry.quantity + " (" + entry.category + ")";
+        orderDisplay.appendChild(entryDiv);
     });
 }
 
