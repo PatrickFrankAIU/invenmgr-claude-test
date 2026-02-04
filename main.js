@@ -1,4 +1,5 @@
-let inventory = [
+// Claude: Added localStorage persistence - default data used when no saved state exists
+let defaultInventory = [
     {
         category: 'Fruits',
         products: [
@@ -20,8 +21,31 @@ let inventory = [
 // global variables
 let categoryMenu = document.getElementById('categoryInput');
 let productMenu = document.getElementById('productInput');
+let inventory = [];
 let shipment = [];
 let order = [];
+
+// Claude: Load data from localStorage, or use defaults if nothing is saved
+function loadData() {
+    let saved = localStorage.getItem('inventoryAppData');
+    if (saved) {
+        let data = JSON.parse(saved);
+        inventory = data.inventory;
+        shipment = data.shipment;
+        order = data.order;
+    } else {
+        inventory = JSON.parse(JSON.stringify(defaultInventory));
+    }
+}
+
+// Claude: Save all data to localStorage after every change
+function saveData() {
+    localStorage.setItem('inventoryAppData', JSON.stringify({
+        inventory: inventory,
+        shipment: shipment,
+        order: order
+    }));
+}
 
 // display the inventory 
 function displayInventory() {
@@ -94,6 +118,7 @@ function addNewCategory() {
     categoryOption.textContent = newCategoryInput;
     categoryMenu.appendChild(categoryOption);
     document.getElementById('newCategoryInput').value = '';
+    saveData();
     displayInventory();
 }
 document.getElementById('addCategoryButton').addEventListener('click', addNewCategory);
@@ -145,6 +170,7 @@ function addShipment() {
         shipCategory.products.push({ product: productInput, quantity: quantityInput });
     }
 
+    saveData();
     displayInventory();
     displayShipment();
 }
@@ -213,6 +239,7 @@ function addOrder() {
         orderCategory.products.push({product: productInput, quantity: quantityInput});
     }
 
+    saveData();
     displayInventory();
     displayOrder();
 }
@@ -236,5 +263,9 @@ function displayOrder() {
 }
 
 
+// Claude: Load saved data before rendering
+loadData();
 displayInventory();
+displayShipment();
+displayOrder();
 createCategories();
