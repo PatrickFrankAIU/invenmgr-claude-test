@@ -1,16 +1,48 @@
 /* styles.css */
 /* This is just some basic formatting to get us started. */
 
+/* Claude: Added CSS custom properties for dark mode theming */
+body {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --heading-color: #333333;
+    --border-color: #cccccc;
+    --input-bg: #ffffff;
+    --input-text: #333333;
+    --btn-bg: #007bff;
+    --btn-hover-bg: #0056b3;
+    --btn-text: #ffffff;
+    --highlight-shipment: #a8e6a3;
+    --highlight-order: #f5a623;
+}
+
+body[data-theme="dark"] {
+    --bg-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --heading-color: #e0e0e0;
+    --border-color: #444444;
+    --input-bg: #2c2c2c;
+    --input-text: #e0e0e0;
+    --btn-bg: #0d6efd;
+    --btn-hover-bg: #3d8bfd;
+    --btn-text: #ffffff;
+    --highlight-shipment: #2e7d32;
+    --highlight-order: #e65100;
+}
+
 /* Body styles */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
     margin: 20px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* Heading styles */
 h1, h2 {
-    color: #333;
+    color: var(--heading-color);
 }
 
 /* Form and input styles */
@@ -18,32 +50,31 @@ input[type="number"], input[type="text"], select {
     margin-bottom: 10px;
     padding: 8px;
     width: 200px;
-}
-
-input[type="number"], input[type="text"] {
-    border: 1px solid #ccc;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
 }
 
 /* Button styles */
 button {
     padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: var(--btn-hover-bg);
 }
 
 /* Inventory display styles */
 #inventoryDisplay {
     margin-top: 20px;
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
 }
 
@@ -55,12 +86,12 @@ button:hover {
 
 /* Claude: Added highlight animations for shipment/order feedback */
 @keyframes highlight-shipment {
-    0%   { background-color: #a8e6a3; }
+    0%   { background-color: var(--highlight-shipment); }
     100% { background-color: transparent; }
 }
 
 @keyframes highlight-order {
-    0%   { background-color: #f5a623; }
+    0%   { background-color: var(--highlight-order); }
     100% { background-color: transparent; }
 }
 
@@ -70,4 +101,15 @@ button:hover {
 
 .highlight-order {
     animation: highlight-order 1.5s ease-out;
+}
+
+/* Claude: Dark mode toggle styling */
+#themeToggleContainer {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+#themeToggleLabel {
+    cursor: pointer;
+    font-size: 14px;
 }

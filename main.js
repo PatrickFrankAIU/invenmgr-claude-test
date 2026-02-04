@@ -280,6 +280,23 @@ function displayOrder() {
 }
 
 
+// Claude: Dark mode toggle - load preference and wire up checkbox
+let themeToggle = document.getElementById('themeToggle');
+let savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+    document.body.dataset.theme = 'dark';
+    themeToggle.checked = true;
+}
+themeToggle.addEventListener('change', function() {
+    if (themeToggle.checked) {
+        document.body.dataset.theme = 'dark';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+    }
+});
+
 // Claude: Load saved data before rendering
 loadData();
 displayInventory();
