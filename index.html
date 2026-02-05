@@ -29,13 +29,15 @@
     <button onclick="addShipment()">Add Shipment</button>
     <button onclick="addOrder()">Add Order</button>
 
-
-    <input id="newCategoryInput" type="text" placeholder="New Category">
-    <button id="addCategoryButton">Add Category</button>
-    <br>
-    <!-- Claude: Added controls for adding a new product to an existing category -->
-    <input id="newProductInput" type="text" placeholder="New Product Name">
-    <button id="addProductButton">Add Product to Category</button>
+    <!-- Claude: Separated category/product controls into their own boxed section -->
+    <div id="manageCategoriesBox">
+        <strong>Manage Categories & Products</strong><br>
+        <input id="newCategoryInput" type="text" placeholder="New Category">
+        <button id="addCategoryButton">Add Category</button>
+        <br>
+        <input id="newProductInput" type="text" placeholder="New Product Name">
+        <button id="addProductButton">Add Product to Category</button>
+    </div>
 
     <h2>Inventory</h2>
     <div id="inventoryDisplay"></div>

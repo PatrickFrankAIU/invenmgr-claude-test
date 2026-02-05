@@ -78,6 +78,15 @@ button:hover {
     background-color: var(--btn-hover-bg);
 }
 
+/* Claude: Boxed section for category/product management */
+#manageCategoriesBox {
+    margin-top: 15px;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    display: inline-block;
+}
+
 /* Inventory display styles */
 #inventoryDisplay {
     margin-top: 20px;
