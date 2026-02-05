@@ -66,6 +66,47 @@ function showMessage(text, type) {
     }, 4000);
 }
 
+// Claude: Refactored - shared helpers to reduce duplication in addShipment/addOrder
+function getFormInputs() {
+    return {
+        category: document.getElementById('categoryInput').value,
+        product: document.getElementById('productInput').value,
+        quantity: parseInt(document.getElementById('quantityInput').value)
+    };
+}
+
+function validateBaseInputs(inputs) {
+    if (!inputs.category) {
+        showMessage('Please select a category.', 'error');
+        return false;
+    }
+    if (!inputs.product) {
+        showMessage('Please select a product.', 'error');
+        return false;
+    }
+    if (isNaN(inputs.quantity) || inputs.quantity <= 0) {
+        showMessage('Please enter a valid quantity greater than zero.', 'error');
+        return false;
+    }
+    return true;
+}
+
+// Claude: Refactored - shared log display for shipment and order history
+function displayLog(elementId, logArray, emptyMessage) {
+    let display = document.getElementById(elementId);
+    display.innerHTML = '';
+    if (logArray.length === 0) {
+        display.textContent = emptyMessage;
+        return;
+    }
+    let sorted = logArray.slice().reverse();
+    sorted.forEach(entry => {
+        let entryDiv = document.createElement('div');
+        entryDiv.textContent = entry.date + ": " + entry.product + " x" + entry.quantity + " (" + entry.category + ")";
+        display.appendChild(entryDiv);
+    });
+}
+
 // Claude: Highlight an inventory item after a shipment or order
 function highlightProduct(categoryName, productName, type) {
     let selector = '[data-category="' + categoryName + '"][data-product="' + productName + '"]';
@@ -192,134 +233,76 @@ function addNewProduct() {
 document.getElementById('addProductButton').addEventListener('click', addNewProduct);
 
 function addShipment() {
-    // this code adds a shipment (incoming new inventory)
+    let inputs = getFormInputs();
+    if (!validateBaseInputs(inputs)) return;
 
-    let categoryInput = document.getElementById('categoryInput').value;
-    let productInput = document.getElementById('productInput').value;
-    let quantityInput = parseInt(document.getElementById('quantityInput').value);
-
-    // Claude: Added input validation for shipments
-    if (!categoryInput) {
-        showMessage('Please select a category.', 'error');
-        return;
-    }
-    if (!productInput) {
-        showMessage('Please select a product.', 'error');
-        return;
-    }
-    if (isNaN(quantityInput) || quantityInput <= 0) {
-        showMessage('Please enter a valid quantity greater than zero.', 'error');
-        return;
-    }
-
-    let category = inventory.find(cat => cat.category === categoryInput);
-    if (!category) { // check: Why is this "not"? 
-        category = { category: categoryInput, products: [] };
+    let category = inventory.find(cat => cat.category === inputs.category);
+    if (!category) {
+        category = { category: inputs.category, products: [] };
         inventory.push(category);
     }
 
-    let product = category.products.find(prod => prod.product === productInput);
+    let product = category.products.find(prod => prod.product === inputs.product);
     if (product) {
-        product.quantity += quantityInput;
+        product.quantity += inputs.quantity;
     } else {
-        category.products.push({ product: productInput, quantity: quantityInput });
+        category.products.push({ product: inputs.product, quantity: inputs.quantity });
     }
 
-    // Claude: Changed to timestamped log entry instead of aggregated totals
     shipment.push({
-        category: categoryInput,
-        product: productInput,
-        quantity: quantityInput,
+        category: inputs.category,
+        product: inputs.product,
+        quantity: inputs.quantity,
         date: new Date().toLocaleString()
     });
 
     document.getElementById('quantityInput').value = '';
     saveData();
     displayInventory();
-    highlightProduct(categoryInput, productInput, 'shipment');
+    highlightProduct(inputs.category, inputs.product, 'shipment');
     displayShipment();
-    showMessage('Shipment recorded: ' + productInput + ' x' + quantityInput + '.', 'success');
+    showMessage('Shipment recorded: ' + inputs.product + ' x' + inputs.quantity + '.', 'success');
 }
 
-// Claude: Rewritten to display timestamped shipment log (newest first)
 function displayShipment() {
-    let shipmentDisplay = document.getElementById('shipmentDisplay');
-    shipmentDisplay.innerHTML = '';
-    if (shipment.length === 0) {
-        shipmentDisplay.textContent = 'No shipments recorded.';
-        return;
-    }
-    let sorted = shipment.slice().reverse();
-    sorted.forEach(entry => {
-        let entryDiv = document.createElement('div');
-        entryDiv.textContent = entry.date + ": " + entry.product + " x" + entry.quantity + " (" + entry.category + ")";
-        shipmentDisplay.appendChild(entryDiv);
-    });
+    displayLog('shipmentDisplay', shipment, 'No shipments recorded.');
 }
 
 function addOrder() {
-    let categoryInput = document.getElementById('categoryInput').value;
-    let productInput = document.getElementById('productInput').value;
-    let quantityInput = parseInt(document.getElementById('quantityInput').value);
+    let inputs = getFormInputs();
+    if (!validateBaseInputs(inputs)) return;
 
-    // Claude: Added input validation for orders (including stock check)
-    if (!categoryInput) {
-        showMessage('Please select a category.', 'error');
-        return;
-    }
-    if (!productInput) {
-        showMessage('Please select a product.', 'error');
-        return;
-    }
-    if (isNaN(quantityInput) || quantityInput <= 0) {
-        showMessage('Please enter a valid quantity greater than zero.', 'error');
-        return;
-    }
-
-    let category = inventory.find(cat => cat.category === categoryInput);
+    let category = inventory.find(cat => cat.category === inputs.category);
     if (!category) {
         showMessage('Category not found in inventory.', 'error');
         return;
     }
 
-    let product = category.products.find(prod => prod.product === productInput);
-    if (!product || product.quantity < quantityInput) {
+    let product = category.products.find(prod => prod.product === inputs.product);
+    if (!product || product.quantity < inputs.quantity) {
         let available = product ? product.quantity : 0;
-        showMessage('Insufficient stock. Available: ' + available + ', requested: ' + quantityInput + '.', 'error');
+        showMessage('Insufficient stock. Available: ' + available + ', requested: ' + inputs.quantity + '.', 'error');
         return;
     }
-    product.quantity -= quantityInput;
+    product.quantity -= inputs.quantity;
 
-    // Claude: Changed to timestamped log entry instead of aggregated totals
     order.push({
-        category: categoryInput,
-        product: productInput,
-        quantity: quantityInput,
+        category: inputs.category,
+        product: inputs.product,
+        quantity: inputs.quantity,
         date: new Date().toLocaleString()
     });
 
     document.getElementById('quantityInput').value = '';
     saveData();
     displayInventory();
-    highlightProduct(categoryInput, productInput, 'order');
+    highlightProduct(inputs.category, inputs.product, 'order');
     displayOrder();
-    showMessage('Order recorded: ' + productInput + ' x' + quantityInput + '.', 'success');
+    showMessage('Order recorded: ' + inputs.product + ' x' + inputs.quantity + '.', 'success');
 }
 
-// Claude: Rewritten to display timestamped order log (newest first)
 function displayOrder() {
-    let orderDisplay = document.getElementById('orderDisplay');
-    orderDisplay.innerHTML = '';
-    if (order.length === 0) {
-        orderDisplay.textContent = 'No orders recorded.';
-        return;
-    }
-    let sorted = order.slice().reverse();
-    sorted.forEach(entry => {
-        let entryDiv = document.createElement('div');
-        entryDiv.textContent = entry.date + ": " + entry.product + " x" + entry.quantity + " (" + entry.category + ")";
-        orderDisplay.appendChild(entryDiv);
-    });
+    displayLog('orderDisplay', order, 'No orders recorded.');
 }
 
 
