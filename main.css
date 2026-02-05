@@ -78,6 +78,18 @@ button:hover {
     background-color: var(--btn-hover-bg);
 }
 
+/* Claude: Clear history button styling */
+.clear-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+    background-color: #dc3545;
+    vertical-align: middle;
+}
+
+.clear-btn:hover {
+    background-color: #a71d2a;
+}
+
 /* Claude: Boxed section for category/product management */
 #manageCategoriesBox {
     margin-top: 15px;

@@ -306,6 +306,33 @@ function displayOrder() {
 }
 
 
+// Claude: Clear shipment and order history with confirmation
+document.getElementById('clearShipmentsButton').addEventListener('click', function() {
+    if (shipment.length === 0) {
+        showMessage('No shipment history to clear.', 'error');
+        return;
+    }
+    if (confirm('Clear all shipment history?')) {
+        shipment = [];
+        saveData();
+        displayShipment();
+        showMessage('Shipment history cleared.', 'success');
+    }
+});
+
+document.getElementById('clearOrdersButton').addEventListener('click', function() {
+    if (order.length === 0) {
+        showMessage('No order history to clear.', 'error');
+        return;
+    }
+    if (confirm('Clear all order history?')) {
+        order = [];
+        saveData();
+        displayOrder();
+        showMessage('Order history cleared.', 'success');
+    }
+});
+
 // Claude: Dark mode toggle - load preference and wire up checkbox
 let themeToggle = document.getElementById('themeToggle');
 let savedTheme = localStorage.getItem('theme');
