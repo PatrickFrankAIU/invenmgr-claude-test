@@ -62,6 +62,20 @@ The project evolved from a bare starter template through several phases:
 
 All changes were made with Claude AI assistance (co-authored commits).
 
+## Coding Style
+- **Naming:** camelCase for variables and functions
+- **Variable names:** Should reflect their contents and role (e.g., `categoryList` not `cl`, `selectedProduct` not `item`)
+
+## Current Priorities
+_(update this section with what to work on next)_
+
+## Things to Avoid
+- Don't add external libraries — keep it dependency-free vanilla JS
+- Keep code beginner-friendly — this is a student learning project
+
+## Testing Approach
+_(to be defined)_
+
 ## Suggested Extensions (from README)
 These are student exercises, roughly ordered by difficulty:
 
