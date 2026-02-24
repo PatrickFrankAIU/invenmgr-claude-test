@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Manager — Theme Builder</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #111;
+    color: #ccc;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Layout */
+  .app {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+  }
+
+  .app-header {
+    grid-column: 1 / -1;
+    padding: 10px 20px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .app-header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #eee;
+  }
+
+  .app-header .subtitle {
+    font-size: 12px;
+    color: #777;
+  }
+
+  /* Controls panel */
+  .controls {
+    background: #1a1a1a;
+    border-right: 1px solid #333;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .controls::-webkit-scrollbar { width: 6px; }
+  .controls::-webkit-scrollbar-track { background: transparent; }
+  .controls::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+  .control-group {
+    margin-bottom: 20px;
+  }
+
+  .control-group h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #888;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  .control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .control-row label {
+    font-size: 12px;
+    color: #aaa;
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+
+  .control-row input[type="color"] {
+    -webkit-appearance: none;
+    border: 1px solid #444;
+    border-radius: 4px;
+    width: 36px;
+    height: 26px;
+    cursor: pointer;
+    background: transparent;
+    padding: 1px;
+  }
+
+  .control-row input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 1px;
+  }
+
+  .control-row input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 2px;
+  }
+
+  .control-row input[type="range"] {
+    width: 100px;
+    accent-color: #5b9bf5;
+  }
+
+  .control-row .range-value {
+    font-size: 11px;
+    font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    color: #777;
+    min-width: 32px;
+    text-align: right;
+  }
+
+  /* Presets */
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .preset-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #222;
+    color: #bbb;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .preset-btn:hover {
+    border-color: #5b9bf5;
+    color: #fff;
+  }
+
+  .preset-btn.active {
+    border-color: #5b9bf5;
+    background: #1a2a40;
+    color: #5b9bf5;
+  }
+
+  /* Main area */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Preview */
+  .preview-container {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    background: #0d0d0d;
+    padding: 20px;
+  }
+
+  .preview-frame {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  .preview-frame iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* Transparent overlay blocks clicks on the iframe */
+  .preview-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    cursor: default;
+  }
+
+  /* Output area */
+  .output {
+    border-top: 1px solid #333;
+    background: #1a1a1a;
+    padding: 14px 20px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .output-header h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #888;
+  }
+
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 12px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #222;
+    color: #bbb;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover {
+    border-color: #5b9bf5;
+    color: #fff;
+  }
+
+  .copy-btn.copied {
+    border-color: #4caf50;
+    color: #4caf50;
+  }
+
+  .output pre {
+    font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #aaa;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* Tab switcher for output */
+  .output-tabs {
+    display: flex;
+    gap: 4px;
+  }
+
+  .output-tab {
+    font-size: 11px;
+    padding: 4px 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #777;
+    cursor: pointer;
+  }
+
+  .output-tab.active {
+    border-color: #444;
+    background: #222;
+    color: #bbb;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="app-header">
+    <div>
+      <h1>Inventory Manager — Theme Builder</h1>
+      <span class="subtitle">Customize your app's CSS custom properties</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="control-group">
+      <h3>Presets</h3>
+      <div class="presets" id="presets"></div>
+    </div>
+
+    <div class="control-group">
+      <h3>Base Theme</h3>
+      <div class="control-row">
+        <label>Mode</label>
+        <select id="themeMode" style="background:#222;color:#ccc;border:1px solid #444;border-radius:4px;padding:3px 6px;font-size:12px;">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h3>Core Colors</h3>
+      <div class="control-row">
+        <label>Background</label>
+        <input type="color" id="bgColor">
+      </div>
+      <div class="control-row">
+        <label>Text</label>
+        <input type="color" id="textColor">
+      </div>
+      <div class="control-row">
+        <label>Headings</label>
+        <input type="color" id="headingColor">
+      </div>
+      <div class="control-row">
+        <label>Borders</label>
+        <input type="color" id="borderColor">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h3>Inputs</h3>
+      <div class="control-row">
+        <label>Input Background</label>
+        <input type="color" id="inputBg">
+      </div>
+      <div class="control-row">
+        <label>Input Text</label>
+        <input type="color" id="inputText">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h3>Buttons</h3>
+      <div class="control-row">
+        <label>Button Color</label>
+        <input type="color" id="btnBg">
+      </div>
+      <div class="control-row">
+        <label>Button Hover</label>
+        <input type="color" id="btnHoverBg">
+      </div>
+      <div class="control-row">
+        <label>Button Text</label>
+        <input type="color" id="btnText">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h3>Feedback</h3>
+      <div class="control-row">
+        <label>Success BG</label>
+        <input type="color" id="msgSuccessBg">
+      </div>
+      <div class="control-row">
+        <label>Success Text</label>
+        <input type="color" id="msgSuccessText">
+      </div>
+      <div class="control-row">
+        <label>Error BG</label>
+        <input type="color" id="msgErrorBg">
+      </div>
+      <div class="control-row">
+        <label>Error Text</label>
+        <input type="color" id="msgErrorText">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h3>Highlights</h3>
+      <div class="control-row">
+        <label>Shipment</label>
+        <input type="color" id="highlightShipment">
+      </div>
+      <div class="control-row">
+        <label>Order</label>
+        <input type="color" id="highlightOrder">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h3>Sizing</h3>
+      <div class="control-row">
+        <label>Font Size</label>
+        <input type="range" id="fontSize" min="12" max="20" step="1">
+        <span class="range-value" id="fontSizeVal"></span>
+      </div>
+      <div class="control-row">
+        <label>Border Radius</label>
+        <input type="range" id="borderRadius" min="0" max="16" step="1">
+        <span class="range-value" id="borderRadiusVal"></span>
+      </div>
+      <div class="control-row">
+        <label>Spacing</label>
+        <input type="range" id="spacing" min="12" max="32" step="2">
+        <span class="range-value" id="spacingVal"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content area -->
+  <div class="main">
+    <div class="preview-container">
+      <div class="preview-frame">
+        <iframe id="previewFrame" src="index.html"></iframe>
+        <div class="preview-overlay"></div>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="output">
+      <div class="output-header">
+        <div class="output-tabs">
+          <button class="output-tab active" data-tab="css" onclick="switchTab('css')">CSS Variables</button>
+          <button class="output-tab" data-tab="prompt" onclick="switchTab('prompt')">Prompt</button>
+        </div>
+        <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy</button>
+      </div>
+      <pre id="outputPre"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Defaults ────────────────────────────────────────────────
+const LIGHT_DEFAULTS = {
+  bgColor: '#ffffff', textColor: '#333333', headingColor: '#333333',
+  borderColor: '#cccccc', inputBg: '#ffffff', inputText: '#333333',
+  btnBg: '#007bff', btnHoverBg: '#0056b3', btnText: '#ffffff',
+  highlightShipment: '#a8e6a3', highlightOrder: '#f5a623',
+  msgSuccessBg: '#d4edda', msgSuccessText: '#155724',
+  msgErrorBg: '#f8d7da', msgErrorText: '#721c24',
+  fontSize: 14, borderRadius: 4, spacing: 20
+};
+
+const DARK_DEFAULTS = {
+  bgColor: '#1e1e1e', textColor: '#e0e0e0', headingColor: '#e0e0e0',
+  borderColor: '#8b8484', inputBg: '#2c2c2c', inputText: '#e0e0e0',
+  btnBg: '#0d6efd', btnHoverBg: '#3d8bfd', btnText: '#ffffff',
+  highlightShipment: '#2e7d32', highlightOrder: '#e65100',
+  msgSuccessBg: '#1b4332', msgSuccessText: '#a8e6a3',
+  msgErrorBg: '#4a1c1c', msgErrorText: '#f5a6a6',
+  fontSize: 14, borderRadius: 4, spacing: 20
+};
+
+const PRESETS = {
+  'Light (Default)': { mode: 'light', ...LIGHT_DEFAULTS },
+  'Dark (Default)': { mode: 'dark', ...DARK_DEFAULTS },
+  'Ocean':  {
+    mode: 'dark',
+    bgColor: '#0b1929', textColor: '#b2d4f5', headingColor: '#e3f0ff',
+    borderColor: '#1e3a5f', inputBg: '#0f2440', inputText: '#b2d4f5',
+    btnBg: '#1976d2', btnHoverBg: '#2196f3', btnText: '#ffffff',
+    highlightShipment: '#004d40', highlightOrder: '#e65100',
+    msgSuccessBg: '#0d3b2e', msgSuccessText: '#80cbc4',
+    msgErrorBg: '#3e1a1a', msgErrorText: '#ef9a9a',
+    fontSize: 14, borderRadius: 6, spacing: 20
+  },
+  'Forest': {
+    mode: 'light',
+    bgColor: '#f5f7f2', textColor: '#2d3b2d', headingColor: '#1a2e1a',
+    borderColor: '#c5d4b5', inputBg: '#ffffff', inputText: '#2d3b2d',
+    btnBg: '#2e7d32', btnHoverBg: '#1b5e20', btnText: '#ffffff',
+    highlightShipment: '#a5d6a7', highlightOrder: '#ffb74d',
+    msgSuccessBg: '#e8f5e9', msgSuccessText: '#1b5e20',
+    msgErrorBg: '#fce4ec', msgErrorText: '#b71c1c',
+    fontSize: 14, borderRadius: 6, spacing: 22
+  },
+  'Sunset': {
+    mode: 'dark',
+    bgColor: '#1a1018', textColor: '#e8d5d0', headingColor: '#ffeedd',
+    borderColor: '#3d2833', inputBg: '#241520', inputText: '#e8d5d0',
+    btnBg: '#e65100', btnHoverBg: '#ff6d00', btnText: '#ffffff',
+    highlightShipment: '#ff8a65', highlightOrder: '#ffab40',
+    msgSuccessBg: '#1b3a2a', msgSuccessText: '#a5d6a7',
+    msgErrorBg: '#4a1a1a', msgErrorText: '#ef9a9a',
+    fontSize: 14, borderRadius: 8, spacing: 20
+  }
+};
+
+// ── State ───────────────────────────────────────────────────
+const state = { mode: 'light', ...LIGHT_DEFAULTS };
+let activePreset = 'Light (Default)';
+let activeTab = 'css';
+
+// ── Control IDs mapped to state keys ────────────────────────
+const COLOR_CONTROLS = [
+  'bgColor', 'textColor', 'headingColor', 'borderColor',
+  'inputBg', 'inputText', 'btnBg', 'btnHoverBg', 'btnText',
+  'msgSuccessBg', 'msgSuccessText', 'msgErrorBg', 'msgErrorText',
+  'highlightShipment', 'highlightOrder'
+];
+
+const RANGE_CONTROLS = [
+  { id: 'fontSize', valId: 'fontSizeVal', unit: 'px' },
+  { id: 'borderRadius', valId: 'borderRadiusVal', unit: 'px' },
+  { id: 'spacing', valId: 'spacingVal', unit: 'px' }
+];
+
+// ── Init ────────────────────────────────────────────────────
+function init() {
+  buildPresets();
+  bindControls();
+  syncControlsFromState();
+
+  const iframe = document.getElementById('previewFrame');
+  iframe.addEventListener('load', () => updateAll());
+
+  updateOutput(); // show output immediately; preview updates on iframe load
+}
+
+function buildPresets() {
+  const container = document.getElementById('presets');
+  for (const name of Object.keys(PRESETS)) {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn' + (name === activePreset ? ' active' : '');
+    btn.textContent = name;
+    btn.addEventListener('click', () => applyPreset(name));
+    container.appendChild(btn);
+  }
+}
+
+function applyPreset(name) {
+  const preset = PRESETS[name];
+  if (!preset) return;
+  activePreset = name;
+  Object.assign(state, preset);
+  document.getElementById('themeMode').value = state.mode;
+  syncControlsFromState();
+  updateAll();
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === name);
+  });
+}
+
+function bindControls() {
+  // Mode select
+  document.getElementById('themeMode').addEventListener('change', (e) => {
+    state.mode = e.target.value;
+    const defaults = state.mode === 'dark' ? DARK_DEFAULTS : LIGHT_DEFAULTS;
+    Object.assign(state, defaults);
+    syncControlsFromState();
+    activePreset = null;
+    clearActivePreset();
+    updateAll();
+  });
+
+  // Color pickers
+  for (const key of COLOR_CONTROLS) {
+    document.getElementById(key).addEventListener('input', (e) => {
+      state[key] = e.target.value;
+      activePreset = null;
+      clearActivePreset();
+      updateAll();
+    });
+  }
+
+  // Range sliders
+  for (const { id, valId, unit } of RANGE_CONTROLS) {
+    document.getElementById(id).addEventListener('input', (e) => {
+      state[id] = parseInt(e.target.value);
+      document.getElementById(valId).textContent = e.target.value + unit;
+      activePreset = null;
+      clearActivePreset();
+      updateAll();
+    });
+  }
+}
+
+function syncControlsFromState() {
+  for (const key of COLOR_CONTROLS) {
+    document.getElementById(key).value = state[key];
+  }
+  for (const { id, valId, unit } of RANGE_CONTROLS) {
+    document.getElementById(id).value = state[id];
+    document.getElementById(valId).textContent = state[id] + unit;
+  }
+}
+
+function clearActivePreset() {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+}
+
+// ── Render ──────────────────────────────────────────────────
+function updateAll() {
+  renderPreview();
+  updateOutput();
+}
+
+function renderPreview() {
+  const iframe = document.getElementById('previewFrame');
+  const iDoc = iframe.contentDocument;
+  if (!iDoc || !iDoc.body) return;
+
+  const s = state;
+
+  // Force dark/light mode on the iframe's body, bypassing its own toggle logic
+  if (s.mode === 'dark') {
+    iDoc.body.setAttribute('data-theme', 'dark');
+  } else {
+    iDoc.body.removeAttribute('data-theme');
+  }
+
+  // Inject (or update) a style tag with our CSS variable overrides
+  let styleEl = iDoc.getElementById('playground-overrides');
+  if (!styleEl) {
+    styleEl = iDoc.createElement('style');
+    styleEl.id = 'playground-overrides';
+    iDoc.head.appendChild(styleEl);
+  }
+
+  styleEl.textContent = `
+    /* Theme Builder overrides */
+    body, body[data-theme="dark"] {
+      --bg-color: ${s.bgColor} !important;
+      --text-color: ${s.textColor} !important;
+      --heading-color: ${s.headingColor} !important;
+      --border-color: ${s.borderColor} !important;
+      --input-bg: ${s.inputBg} !important;
+      --input-text: ${s.inputText} !important;
+      --btn-bg: ${s.btnBg} !important;
+      --btn-hover-bg: ${s.btnHoverBg} !important;
+      --btn-text: ${s.btnText} !important;
+      --highlight-shipment: ${s.highlightShipment} !important;
+      --highlight-order: ${s.highlightOrder} !important;
+      --msg-success-bg: ${s.msgSuccessBg} !important;
+      --msg-success-text: ${s.msgSuccessText} !important;
+      --msg-error-bg: ${s.msgErrorBg} !important;
+      --msg-error-text: ${s.msgErrorText} !important;
+    }
+    body {
+      font-size: ${s.fontSize}px !important;
+      margin: ${s.spacing}px !important;
+    }
+    input, select, button, .message-banner, #inventoryDisplay, #manageCategoriesBox {
+      border-radius: ${s.borderRadius}px !important;
+    }
+  `;
+}
+
+// ── Output ──────────────────────────────────────────────────
+function updateOutput() {
+  const pre = document.getElementById('outputPre');
+  if (activeTab === 'css') {
+    pre.textContent = generateCSS();
+  } else {
+    pre.textContent = generatePrompt();
+  }
+}
+
+function generateCSS() {
+  const s = state;
+  const isDark = s.mode === 'dark';
+  const selector = isDark ? 'body[data-theme="dark"]' : 'body';
+
+  let css = `/* ${isDark ? 'Dark' : 'Light'} theme — generated by Theme Builder */\n`;
+  css += `${selector} {\n`;
+  css += `    --bg-color: ${s.bgColor};\n`;
+  css += `    --text-color: ${s.textColor};\n`;
+  css += `    --heading-color: ${s.headingColor};\n`;
+  css += `    --border-color: ${s.borderColor};\n`;
+  css += `    --input-bg: ${s.inputBg};\n`;
+  css += `    --input-text: ${s.inputText};\n`;
+  css += `    --btn-bg: ${s.btnBg};\n`;
+  css += `    --btn-hover-bg: ${s.btnHoverBg};\n`;
+  css += `    --btn-text: ${s.btnText};\n`;
+  css += `    --highlight-shipment: ${s.highlightShipment};\n`;
+  css += `    --highlight-order: ${s.highlightOrder};\n`;
+  css += `    --msg-success-bg: ${s.msgSuccessBg};\n`;
+  css += `    --msg-success-text: ${s.msgSuccessText};\n`;
+  css += `    --msg-error-bg: ${s.msgErrorBg};\n`;
+  css += `    --msg-error-text: ${s.msgErrorText};\n`;
+  css += `}`;
+
+  const defaults = isDark ? DARK_DEFAULTS : LIGHT_DEFAULTS;
+  if (s.fontSize !== defaults.fontSize || s.borderRadius !== defaults.borderRadius || s.spacing !== defaults.spacing) {
+    css += `\n\n/* Sizing overrides */\n`;
+    if (s.fontSize !== defaults.fontSize) {
+      css += `body { font-size: ${s.fontSize}px; }\n`;
+    }
+    if (s.borderRadius !== defaults.borderRadius) {
+      css += `input, select, button, .message-banner, #inventoryDisplay, #manageCategoriesBox {\n`;
+      css += `    border-radius: ${s.borderRadius}px;\n}\n`;
+    }
+    if (s.spacing !== defaults.spacing) {
+      css += `body { margin: ${s.spacing}px; }\n`;
+    }
+  }
+
+  return css;
+}
+
+function generatePrompt() {
+  const s = state;
+  const defaults = s.mode === 'dark' ? DARK_DEFAULTS : LIGHT_DEFAULTS;
+  const parts = [];
+
+  // Identify non-default changes
+  const colorNames = {
+    bgColor: 'background', textColor: 'text color', headingColor: 'heading color',
+    borderColor: 'border color', inputBg: 'input background', inputText: 'input text',
+    btnBg: 'button color', btnHoverBg: 'button hover color', btnText: 'button text',
+    highlightShipment: 'shipment highlight', highlightOrder: 'order highlight',
+    msgSuccessBg: 'success background', msgSuccessText: 'success text',
+    msgErrorBg: 'error background', msgErrorText: 'error text'
+  };
+
+  const colorChanges = [];
+  for (const [key, label] of Object.entries(colorNames)) {
+    if (s[key] !== defaults[key]) {
+      colorChanges.push(`${label} to ${s[key]}`);
+    }
+  }
+
+  if (colorChanges.length > 0) {
+    parts.push('Change ' + colorChanges.join(', ') + '.');
+  }
+
+  if (s.fontSize !== defaults.fontSize) {
+    parts.push(`Set the base font size to ${s.fontSize}px.`);
+  }
+  if (s.borderRadius !== defaults.borderRadius) {
+    parts.push(`Use a border-radius of ${s.borderRadius}px for inputs, buttons, and containers.`);
+  }
+  if (s.spacing !== defaults.spacing) {
+    parts.push(`Use ${s.spacing}px for body margin/padding.`);
+  }
+
+  if (parts.length === 0) {
+    return `Using the default ${s.mode} theme — no changes from baseline.`;
+  }
+
+  return `Update the ${s.mode} theme in main.css:\n\n${parts.join('\n')}`;
+}
+
+// ── Tab switching ───────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.output-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+  updateOutput();
+}
+
+// ── Copy ────────────────────────────────────────────────────
+function copyOutput() {
+  const text = document.getElementById('outputPre').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 1500);
+  });
+}
+
+// ── Go ──────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
